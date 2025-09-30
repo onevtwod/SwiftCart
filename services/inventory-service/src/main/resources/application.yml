@@ -4,12 +4,13 @@ spring:
   application:
     name: inventory-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/inventory
-    username: swiftcart
-    password: swiftcart
+    url: jdbc:postgresql://localhost:5432/swiftcart_inventory
+    username: postgres
+    password: onevtwod
   jpa:
     hibernate:
       ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
   kafka:
     bootstrap-servers: localhost:9092
     consumer:

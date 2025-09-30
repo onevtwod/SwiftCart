@@ -13,10 +13,10 @@ public class SecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/payments/**").permitAll()
-                        .requestMatchers("/orders/**").hasAuthority("SCOPE_orders:write")
+                .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers("/actuator/**").permitAll()
+                        .pathMatchers("/payments/**").permitAll()
+                        .pathMatchers("/orders/**").hasAuthority("SCOPE_orders:write")
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .build();
