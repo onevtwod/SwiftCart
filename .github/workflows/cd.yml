@@ -1,0 +1,41 @@
+name: CD
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Build jars
+        run: ./gradlew :services:order-service:bootJar :services:payment-service:bootJar :services:inventory-service:bootJar :services:notification-service:bootJar :services:api-gateway:bootJar
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push images
+        run: |
+          TAG=${GITHUB_REF_NAME}
+          docker build -t ghcr.io/${{ github.repository_owner }}/order-service:${TAG} services/order-service
+          docker push ghcr.io/${{ github.repository_owner }}/order-service:${TAG}
+          docker build -t ghcr.io/${{ github.repository_owner }}/payment-service:${TAG} services/payment-service
+          docker push ghcr.io/${{ github.repository_owner }}/payment-service:${TAG}
+          docker build -t ghcr.io/${{ github.repository_owner }}/inventory-service:${TAG} services/inventory-service
+          docker push ghcr.io/${{ github.repository_owner }}/inventory-service:${TAG}
+          docker build -t ghcr.io/${{ github.repository_owner }}/notification-service:${TAG} services/notification-service
+          docker push ghcr.io/${{ github.repository_owner }}/notification-service:${TAG}
+          docker build -t ghcr.io/${{ github.repository_owner }}/api-gateway:${TAG} services/api-gateway
+          docker push ghcr.io/${{ github.repository_owner }}/api-gateway:${TAG}

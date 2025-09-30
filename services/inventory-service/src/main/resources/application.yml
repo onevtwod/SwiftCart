@@ -1,0 +1,36 @@
+server:
+  port: 8083
+spring:
+  application:
+    name: inventory-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/inventory
+    username: swiftcart
+    password: swiftcart
+  jpa:
+    hibernate:
+      ddl-auto: update
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: inventory-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+redis:
+  host: localhost
+  port: 6379
+kafka:
+  topics:
+    ordersConfirmed: orders.confirmed.v1
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+tracing:
+  sampling:
+    probability: 1.0
+  zipkin:
+    endpoint: http://localhost:9411/api/v2/spans

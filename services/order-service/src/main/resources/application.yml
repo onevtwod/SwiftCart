@@ -1,0 +1,49 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/orders
+    username: swiftcart
+    password: swiftcart
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+tracing:
+  sampling:
+    probability: 1.0
+  zipkin:
+    endpoint: http://localhost:9411/api/v2/spans
+resilience4j:
+  circuitbreaker:
+    instances:
+      payment:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 20
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        minimumNumberOfCalls: 10
+payment:
+  baseUrl: http://localhost:8082
+kafka:
+  topics:
+    ordersConfirmed: orders.confirmed.v1
+    ordersFailed: orders.failed.v1

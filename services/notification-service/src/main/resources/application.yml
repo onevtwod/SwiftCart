@@ -1,0 +1,31 @@
+server:
+  port: 8084
+spring:
+  application:
+    name: notification-service
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+        spring.json.value.default.type: java.util.LinkedHashMap
+  mail:
+    host: localhost
+    port: 1025
+kafka:
+  topics:
+    ordersConfirmed: orders.confirmed.v1
+    ordersConfirmedDlq: orders.confirmed.dlq
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+tracing:
+  sampling:
+    probability: 1.0
+  zipkin:
+    endpoint: http://localhost:9411/api/v2/spans

@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: swiftcart-dev
+resources:
+  - ../../base
+  - peer-authentication.yaml
+images:
+  - name: ghcr.io/swiftcart/api-gateway
+    newTag: dev
+  - name: ghcr.io/swiftcart/order-service
+    newTag: dev
+  - name: ghcr.io/swiftcart/payment-service
+    newTag: dev
+  - name: ghcr.io/swiftcart/inventory-service
+    newTag: dev
+  - name: ghcr.io/swiftcart/notification-service
+    newTag: dev
