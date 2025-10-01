@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @PactTestFor(providerName = "payment-provider", port = "0")
 class PaymentClientPactTest {
 
-    @au.com.dius.pact.consumer.junit5.Pact(consumer = "order-service")
+    @PactTestFor(providerName = "payment-provider")
     public RequestResponsePact createPact(PactDslWithProvider builder) {
         return builder
                 .uponReceiving("a payment charge request")

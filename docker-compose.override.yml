@@ -1,0 +1,89 @@
+services:
+  postgres:
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=onevtwod
+      - POSTGRES_DB=postgres
+    volumes:
+      - ./infra/postgres-init.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    image: com.swiftcart/api-gateway:0.0.1-SNAPSHOT
+    depends_on:
+      - redis
+    environment:
+      - SPRING_DATA_REDIS_HOST=redis
+      # Optionally disable security locally by setting a relaxed profile
+      # - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8080:8080"
+
+  order-service:
+    build:
+      context: .
+      dockerfile: services/order-service/Dockerfile
+    image: com.swiftcart/order-service:0.0.1-SNAPSHOT
+    depends_on:
+      - kafka
+      - postgres
+      - zipkin
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/orders
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=onevtwod
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - TRACING_ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      - PAYMENT_BASEURL=http://payment-service:8082
+    ports:
+      - "8081:8081"
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: services/payment-service/Dockerfile
+    image: com.swiftcart/payment-service:0.0.1-SNAPSHOT
+    depends_on:
+      - zipkin
+    environment:
+      - TRACING_ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+    ports:
+      - "8082:8082"
+
+  inventory-service:
+    build:
+      context: .
+      dockerfile: services/inventory-service/Dockerfile
+    image: com.swiftcart/inventory-service:0.0.1-SNAPSHOT
+    depends_on:
+      - kafka
+      - postgres
+      - redis
+      - zipkin
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/swiftcart_inventory
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=onevtwod
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_DATA_REDIS_HOST=redis
+      - TRACING_ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+    ports:
+      - "8083:8083"
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: services/notification-service/Dockerfile
+    image: com.swiftcart/notification-service:0.0.1-SNAPSHOT
+    depends_on:
+      - kafka
+      - mailhog
+      - zipkin
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_MAIL_HOST=mailhog
+      - TRACING_ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+    ports:
+      - "8084:8084"

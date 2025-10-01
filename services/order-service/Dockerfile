@@ -1,13 +1,15 @@
 # syntax=docker/dockerfile:1
 FROM eclipse-temurin:17-jdk AS build
 WORKDIR /workspace
-COPY . .
 
-# Expect to be built from the service dir with gradle wrapper in repo root
-# Using gradle in parent might be preferable; for now assume gradle is available in build env
+COPY gradlew gradlew.bat settings.gradle build.gradle /workspace/
+COPY gradle /workspace/gradle
+COPY services /workspace/services
+
+RUN ./gradlew --no-daemon :services:order-service:clean :services:order-service:bootJar -x test
 
 FROM eclipse-temurin:17-jre AS run
 WORKDIR /app
-COPY build/libs/*.jar app.jar
+COPY --from=build /workspace/services/order-service/build/libs/*.jar app.jar
 EXPOSE 8081
 ENTRYPOINT ["java","-jar","/app/app.jar"]

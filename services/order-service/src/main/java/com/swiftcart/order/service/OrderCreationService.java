@@ -28,9 +28,9 @@ public class OrderCreationService {
     private final KafkaOrderPublisher publisher;
 
     public OrderCreationService(OrderRepository orderRepository,
-                                IdempotencyRecordRepository idempotencyRecordRepository,
-                                PaymentClient paymentClient,
-                                KafkaOrderPublisher publisher) {
+            IdempotencyRecordRepository idempotencyRecordRepository,
+            PaymentClient paymentClient,
+            KafkaOrderPublisher publisher) {
         this.orderRepository = orderRepository;
         this.idempotencyRecordRepository = idempotencyRecordRepository;
         this.paymentClient = paymentClient;
@@ -71,8 +71,11 @@ public class OrderCreationService {
                 if (o instanceof Map<?, ?> m) {
                     OrderItemEntity item = new OrderItemEntity();
                     item.setSku((String) m.get("sku"));
-                    Integer qty = Integer.valueOf(String.valueOf(m.getOrDefault("qty", 1)));
-                    BigDecimal unit = new BigDecimal(String.valueOf(m.getOrDefault("unitPrice", "0")));
+                    Object qtyObj = m.get("qty");
+                    Object unitPriceObj = m.get("unitPrice");
+                    Integer qty = qtyObj != null ? Integer.valueOf(String.valueOf(qtyObj)) : 1;
+                    BigDecimal unit = unitPriceObj != null ? new BigDecimal(String.valueOf(unitPriceObj))
+                            : BigDecimal.ZERO;
                     item.setQty(qty);
                     item.setUnitPrice(unit);
                     order.addItem(item);
