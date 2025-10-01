@@ -27,7 +27,7 @@ dependencies {
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus:1.13.2'
     runtimeOnly 'org.postgresql:postgresql:42.7.3'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'au.com.dius.pact.consumer:junit5:4.6.10'
+        testImplementation 'au.com.dius.pact.consumer:junit5:4.6.16'
 }
 
 tasks.named('test') {
